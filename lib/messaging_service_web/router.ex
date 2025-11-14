@@ -20,25 +20,11 @@ defmodule MessagingServiceWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", MessagingServiceWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", MessagingServiceWeb do
+    post "/messages/:type", MessagesController, :send_message
+    post "/webhooks/:type", MessagesController, :receive_webhook_message
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:messaging_service, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
-
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: MessagingServiceWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
+    get "/conversations", ConversationsController, :get_conversations
+    get "/conversations/:id/messages", ConversationsController, :get_messages_for_conversation
   end
 end
