@@ -2,10 +2,10 @@ import Config
 
 # Configure your database
 config :messaging_service, MessagingService.Repo,
-  username: "postgres",
-  password: "Carnage1",
+  username: "messaging_user",
+  password: "messaging_password",
   hostname: "localhost",
-  database: "messaging_service_dev",
+  database: "messaging_service",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
