@@ -3,14 +3,22 @@ defmodule MessagingServiceWeb.MessagesController do
   alias MessagingService.Messages
 
   def send_message(conn, params) do
-    Messages.send_message(params["type"], params)
+    result = Messages.send_message(params["type"], params)
 
-    conn
-    |> put_status(200)
-    |> json(%{})
+    case result do
+      {:ok, _} ->
+        conn
+        |> put_status(200)
+        |> json(%{})
+
+      {:error, reason} ->
+        conn
+        |> put_status(200)
+        |> json(%{})
+    end
   end
 
-  def receive_webhook_message(conn, params) do
+  def ingest_webhook_message(conn, params) do
     IO.inspect(params)
 
     conn

@@ -22,7 +22,7 @@ defmodule MessagingServiceWeb.Router do
 
   scope "/api", MessagingServiceWeb do
     post "/messages/:type", MessagesController, :send_message
-    post "/webhooks/:type", MessagesController, :receive_webhook_message
+    post "/webhooks/:type", MessagesController, :ingest_webhook_message
 
     get "/conversations", ConversationsController, :get_conversations
     get "/conversations/:id/messages", ConversationsController, :get_messages_for_conversation

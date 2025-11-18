@@ -4,10 +4,12 @@ defmodule MessagingService.Schemas.Contact do
 
   schema "contacts" do
     field :email, :string
-    field :phone, :integer
+    field :phone, :string
 
     many_to_many :conversations, MessagingService.Schemas.Conversation,
       join_through: "contact_conversations"
+
+    timestamps()
   end
 
   def changeset(contact, attrs) do

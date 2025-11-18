@@ -4,7 +4,7 @@ defmodule MessagingService.Repo.Migrations.CreateContactsTable do
   def change do
     create table(:contacts) do
       add :email, :string
-      add :phone, :integer
+      add :phone, :string
 
       timestamps()
     end
@@ -13,6 +13,9 @@ defmodule MessagingService.Repo.Migrations.CreateContactsTable do
              check:
                "(phone IS NOT NULL AND email IS NULL) OR (email IS NOT NULL AND phone IS NULL)"
            )
+
+    create unique_index(:contacts, [:email])
+    create unique_index(:contacts, [:phone])
 
     alter table(:messages) do
       add :from_id, references(:contacts)
