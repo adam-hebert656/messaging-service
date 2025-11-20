@@ -15,7 +15,6 @@ defmodule MessagingService.Messages do
         {:ok, message}
 
       {:error, reason} ->
-        IO.inspect("Failed to send SMS: #{reason}")
         {:error, reason}
     end
   end
@@ -29,7 +28,6 @@ defmodule MessagingService.Messages do
         {:ok, message}
 
       {:error, reason} ->
-        IO.inspect("Failed to send MMS: #{reason}")
         {:error, reason}
     end
   end
@@ -43,18 +41,16 @@ defmodule MessagingService.Messages do
         {:ok, message}
 
       {:error, reason} ->
-        IO.inspect("Failed to send Email: #{reason}")
         {:error, reason}
     end
   end
 
   def send_message(_, _message) do
-    IO.inspect("Unknown message type")
     {:error, :unknown_type}
   end
 
   def ingest_message(message) do
-    {:ok, _message} = save_message_to_db(message)
+    save_message_to_db(message)
   end
 
   defp save_message_to_db(message) do
