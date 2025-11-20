@@ -124,6 +124,7 @@ This project structure is laid out for you already. You are welcome to move or c
 
 1. Clone the repository
 2. Run `make setup` to initialize the project
+
 3. Run `docker-compose up -d` to start the PostgreSQL database, or modify it to choose a database of your choice
 4. Run `make run` to start the application
 5. Run `make test` to run tests
