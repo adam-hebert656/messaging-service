@@ -2,6 +2,8 @@ defmodule MessagingService.Messages do
   alias MessagingService.Providers.Sms
   alias MessagingService.Providers.Mms
   alias MessagingService.Providers.Email
+  alias MessagingService.Contacts
+  alias MessagingService.Schemas.Message
   alias MessagingService.Repo
 
   def send_message("sms", message) do
@@ -10,7 +12,7 @@ defmodule MessagingService.Messages do
     case resp do
       {:ok, :sent} ->
         save_message_to_db(message)
-        {:ok, :sent}
+        {:ok, message}
 
       {:error, reason} ->
         IO.inspect("Failed to send SMS: #{reason}")
@@ -24,7 +26,7 @@ defmodule MessagingService.Messages do
     case resp do
       {:ok, :sent} ->
         save_message_to_db(message)
-        {:ok, :sent}
+        {:ok, message}
 
       {:error, reason} ->
         IO.inspect("Failed to send MMS: #{reason}")
@@ -38,7 +40,7 @@ defmodule MessagingService.Messages do
     case resp do
       {:ok, :sent} ->
         save_message_to_db(message)
-        {:ok, :sent}
+        {:ok, message}
 
       {:error, reason} ->
         IO.inspect("Failed to send Email: #{reason}")
@@ -51,38 +53,28 @@ defmodule MessagingService.Messages do
     {:error, :unknown_type}
   end
 
-  defp save_message_to_db(message) do
-    save_contact_info(message)
+  def ingest_message(message) do
+    {:ok, _message} = save_message_to_db(message)
   end
 
-  defp save_contact_info(%{"from" => from, "to" => to, "type" => type}) do
-    if type in ["sms", "mms"] do
-      res = Repo.transact(fn ->
-        from = Repo.insert(%MessagingService.Schemas.Contact{phone: from}, on_conflict: :nothing)
-        to = Repo.insert(%MessagingService.Schemas.Contact{phone: to}, on_conflict: :nothing)
-        {:ok, {from, to}}
-      end)
-      case res do
-        {:ok, _} -> {:ok, :saved}
-        {:error, reason} -> {:error, reason}
-      end
-    else
-      Repo.insert_all(
-        MessagingService.Schemas.Contact,
-        [
-          %{
-            email: from,
-            inserted_at: NaiveDateTime.utc_now(:second),
-            updated_at: NaiveDateTime.utc_now(:second)
-          },
-          %{
-            email: to,
-            inserted_at: NaiveDateTime.utc_now(:second),
-            updated_at: NaiveDateTime.utc_now(:second)
-          }
-        ],
-        on_conflict: :nothing
-      )
-    end
+  defp save_message_to_db(message) do
+    contacts = Contacts.find_or_create_contact_for_message(message)
+
+    conversation =
+      MessagingService.Conversations.find_or_create_conversation_by_contacts(contacts)
+
+    [from, to] = contacts
+
+    %Message{}
+    |> Message.changeset(%{
+      from_id: from.id,
+      to_id: to.id,
+      conversation_id: conversation.id,
+      body: Map.get(message, "body", ""),
+      type: String.to_atom(Map.get(message, "type")),
+      attachments: Map.get(message, "attachments", []),
+      provider_message_id: Map.get(message, "provider_message_id", nil)
+    })
+    |> Repo.insert()
   end
 end

@@ -3,26 +3,37 @@ defmodule MessagingServiceWeb.MessagesController do
   alias MessagingService.Messages
 
   def send_message(conn, params) do
-    result = Messages.send_message(params["type"], params)
+    params =
+      if Map.get(params, "type") == "sms" and Map.get(params, "attachments", nil) != nil do
+        Map.put(params, "type", "mms")
+      else
+        params
+      end
 
-    case result do
-      {:ok, _} ->
+    case Messages.send_message(params["type"], params) do
+      {:ok, message} ->
         conn
         |> put_status(200)
-        |> json(%{})
+        |> json(message)
 
       {:error, reason} ->
         conn
-        |> put_status(200)
-        |> json(%{})
+        |> put_status(500)
+        |> json(Map.from_struct(reason))
     end
   end
 
   def ingest_webhook_message(conn, params) do
-    IO.inspect(params)
+    case Messages.ingest_message(params) do
+      {:ok, message} ->
+        conn
+        |> put_status(200)
+        |> json(message)
 
-    conn
-    |> put_status(200)
-    |> json(%{})
+      {:error, reason} ->
+        conn
+        |> put_status(500)
+        |> json(Map.from_struct(reason))
+    end
   end
 end

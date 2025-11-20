@@ -2,6 +2,8 @@ defmodule MessagingService.Schemas.Contact do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:id, :email, :phone]}
+
   schema "contacts" do
     field :email, :string
     field :phone, :string
@@ -15,6 +17,7 @@ defmodule MessagingService.Schemas.Contact do
   def changeset(contact, attrs) do
     contact
     |> cast(attrs, [:email, :phone])
+    |> unique_constraint([:email, :phone])
     |> validate_one_of_phone_or_email()
   end
 

@@ -1,19 +1,23 @@
 defmodule MessagingServiceWeb.ConversationsController do
   use MessagingServiceWeb, :controller
 
-  def get_conversations(conn, params) do
-    IO.inspect(params)
+  alias MessagingService.Conversations
+
+  def get_conversations(conn, _) do
+    conversations = Conversations.get_all_conversations()
 
     conn
     |> put_status(200)
-    |> json(%{})
+    |> json(conversations)
   end
 
-  def get_messages_for_conversation(conn, params) do
-    IO.inspect(params)
+  def get_messages_for_conversation(conn, %{"id" => id}) do
+    messages =
+      Conversations.get_conversation!(id)
+      |> Map.get(:messages)
 
     conn
     |> put_status(200)
-    |> json(%{})
+    |> json(messages)
   end
 end

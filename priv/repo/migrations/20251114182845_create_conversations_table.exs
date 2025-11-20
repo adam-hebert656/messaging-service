@@ -9,5 +9,9 @@ defmodule MessagingService.Repo.Migrations.CreateConversationsTable do
     alter table(:messages) do
       add :conversation_id, references(:conversations)
     end
+
+    create index(:conversations, :inserted_at)
+
+    create index(:messages, :conversation_id)
   end
 end

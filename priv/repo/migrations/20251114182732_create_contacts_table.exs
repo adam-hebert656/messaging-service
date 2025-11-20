@@ -14,12 +14,16 @@ defmodule MessagingService.Repo.Migrations.CreateContactsTable do
                "(phone IS NOT NULL AND email IS NULL) OR (email IS NOT NULL AND phone IS NULL)"
            )
 
-    create unique_index(:contacts, [:email])
-    create unique_index(:contacts, [:phone])
+    create unique_index(:contacts, :email)
+    create unique_index(:contacts, :phone)
+    create index(:contacts, :inserted_at)
 
     alter table(:messages) do
       add :from_id, references(:contacts)
       add :to_id, references(:contacts)
     end
+
+    create index(:messages, :from_id)
+    create index(:messages, :to_id)
   end
 end
